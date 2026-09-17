@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'product_management_page.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
@@ -16,7 +17,7 @@ class AdminPage extends StatelessWidget {
                 SizedBox(height: 40),
 
                 Text(
-                  'TAILOR ADMIN',
+                  'ADMIN',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -40,13 +41,28 @@ class AdminPage extends StatelessWidget {
                     debugPrint('Đã bấm quản lý sản phẩm');
                   },
                 ),
+
+                ListTile(
+                  leading: Icon(
+                    Icons.receipt_long,
+                    color: Colors.white,
+                  ),
+                  title: Text(
+                    'Quản lý đơn hàng',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  onTap: (){
+                    debugPrint('Đã bấm quản lý đơn hàng');
+                  },
+                ),
               ],
             )
           ),
           Expanded(
             child: Center(
-              child: Text('Nội dung quản lý', 
-              style: TextStyle(fontSize: 24)),
+              child: ProductManagementPage()
             ),
           ),
         ],

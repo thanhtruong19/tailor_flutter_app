@@ -88,7 +88,6 @@ class _LoginPageState extends State<LoginPage> {
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Email',
                     hintText: 'Nhập email của bạn',
                     prefixIcon: Icon(Icons.email_rounded),
                     border: OutlineInputBorder(),
@@ -114,7 +113,6 @@ class _LoginPageState extends State<LoginPage> {
                   controller: passwordController,
                   keyboardType: TextInputType.visiblePassword,
                   decoration: InputDecoration(
-                    labelText: 'Mật khẩu',
                     hintText: 'Nhập mật khẩu',
                     prefixIcon: Icon(Icons.password),
                     suffixIcon: IconButton(
