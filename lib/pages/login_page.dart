@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tailor_app/pages/admin_page.dart';
 
 import 'register_page.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,12 +17,14 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final passwordFocusNode = FocusNode();
   bool hidePassword = true;
   bool isLoading = false;
   final formKey = GlobalKey<FormState>();
 
   Future<void> login() async {
     final isValid = formKey.currentState!.validate();
+
     if (!isValid) {
       return;
     }
@@ -29,24 +33,58 @@ class _LoginPageState extends State<LoginPage> {
       isLoading = true;
     });
 
-    await Future.delayed(Duration(seconds: 2));
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      isLoading = false;
-    });
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) {
-          return AdminPage();
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:8000/api/login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-      ),
-    );
+        body: jsonEncode({
+          'email': emailController.text.trim(),
+          'password': passwordController.text,
+        }),
+      );
+      final responseData = jsonDecode(response.body);
+      if (!mounted) {
+        return;
+      }
+      if (response.statusCode == 200) {
+        final token = responseData['token'] as String;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AdminPage(token: token)
+          ),
+        );
+      }
+      else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              responseData['message'] ?? 'Đăng nhập thất bại',
+            ),
+          ),
+        );
+        passwordFocusNode.requestFocus();
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Không thể kết nối tới máy chủ'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   void goToRegisterPage() {
@@ -110,6 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: 320,
                 child: TextFormField(
                   obscureText: hidePassword,
+                  focusNode: passwordFocusNode,
                   controller: passwordController,
                   keyboardType: TextInputType.visiblePassword,
                   decoration: InputDecoration(
@@ -146,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: 320,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: login,
+                  onPressed: isLoading ? null : login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -182,5 +221,12 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
